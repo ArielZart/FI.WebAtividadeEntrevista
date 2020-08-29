@@ -74,7 +74,9 @@
     <EmbeddedResource Include="DAL\Clientes\Procedures\FI_SP_AltCliente.sql" />
     <EmbeddedResource Include="DAL\Clientes\Procedures\FI_SP_IncCliente.sql" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="DAL\Clientes\Procedures\FI_SP_IncClienteV2.sql" />
+  </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.6.1">
       <Visible>False</Visible>
@@ -86,6 +88,18 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="DAL\Clientes\Procedures\FI_SP_AltClienteV2.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="DAL\Clientes\Procedures\FI_SP_ConsClienteV2.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="DAL\Clientes\Procedures\FI_SP_PesqClienteV2.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="DAL\Clientes\Procedures\FI_SP_VerificaCliente.sql" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

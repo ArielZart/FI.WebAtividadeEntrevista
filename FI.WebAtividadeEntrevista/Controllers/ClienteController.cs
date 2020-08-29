@@ -38,22 +38,31 @@ namespace WebAtividadeEntrevista.Controllers
             }
             else
             {
-                
-                model.Id = bo.Incluir(new Cliente()
-                {                    
-                    CEP = model.CEP,
-                    Cidade = model.Cidade,
-                    Email = model.Email,
-                    Estado = model.Estado,
-                    Logradouro = model.Logradouro,
-                    Nacionalidade = model.Nacionalidade,
-                    Nome = model.Nome,
-                    Sobrenome = model.Sobrenome,
-                    Telefone = model.Telefone
-                });
+                var existe = verificaExistenciaCPF(model.CPF.ToString());
+                if (!existe)
+                {
+                    model.Id = bo.Incluir(new Cliente()
+                    {
+                        CEP = model.CEP,
+                        Cidade = model.Cidade,
+                        Email = model.Email,
+                        Estado = model.Estado,
+                        Logradouro = model.Logradouro,
+                        Nacionalidade = model.Nacionalidade,
+                        Nome = model.Nome,
+                        Sobrenome = model.Sobrenome,
+                        Telefone = model.Telefone,
+                        CPF = model.CPF
+                    });
 
-           
-                return Json("Cadastro efetuado com sucesso");
+
+                    return Json("Cadastro efetuado com sucesso");
+                }
+                else
+                {
+                    Response.StatusCode = 400;
+                    return Json(string.Join(Environment.NewLine, "CPf já está cadastrado no sistema."));
+                }
             }
         }
 
@@ -73,21 +82,31 @@ namespace WebAtividadeEntrevista.Controllers
             }
             else
             {
-                bo.Alterar(new Cliente()
+                var existe = verificaExistencia(model.CPF, model.Id);
+                if (!existe)
                 {
-                    Id = model.Id,
-                    CEP = model.CEP,
-                    Cidade = model.Cidade,
-                    Email = model.Email,
-                    Estado = model.Estado,
-                    Logradouro = model.Logradouro,
-                    Nacionalidade = model.Nacionalidade,
-                    Nome = model.Nome,
-                    Sobrenome = model.Sobrenome,
-                    Telefone = model.Telefone
-                });
-                               
-                return Json("Cadastro alterado com sucesso");
+                    bo.Alterar(new Cliente()
+                    {
+                        Id = model.Id,
+                        CEP = model.CEP,
+                        Cidade = model.Cidade,
+                        Email = model.Email,
+                        Estado = model.Estado,
+                        Logradouro = model.Logradouro,
+                        Nacionalidade = model.Nacionalidade,
+                        Nome = model.Nome,
+                        Sobrenome = model.Sobrenome,
+                        Telefone = model.Telefone,
+                        CPF = model.CPF
+                    });
+
+                    return Json("Cadastro alterado com sucesso");
+                }
+                else
+                {
+                    Response.StatusCode = 400;
+                    return Json(string.Join(Environment.NewLine, "CPf já está cadastrado no sistema."));
+                }
             }
         }
 
@@ -111,7 +130,8 @@ namespace WebAtividadeEntrevista.Controllers
                     Nacionalidade = cliente.Nacionalidade,
                     Nome = cliente.Nome,
                     Sobrenome = cliente.Sobrenome,
-                    Telefone = cliente.Telefone
+                    Telefone = cliente.Telefone,
+                    CPF = cliente.CPF
                 };
 
             
@@ -144,6 +164,37 @@ namespace WebAtividadeEntrevista.Controllers
             catch (Exception ex)
             {
                 return Json(new { Result = "ERROR", Message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Retorna se o cpf passado já existe na base.
+        /// </summary>
+        /// <param name="cpf">cpf a ser pesquisado na base, segue o padrão: 000.000.000-00</param>
+        /// <returns></returns>
+        private bool verificaExistenciaCPF(string cpf)
+        {
+            return new BoCliente().VerificarExistencia(cpf);
+      
+        }
+
+        /// <summary>
+        /// Retorna se o cpf passado já existe na base e nao é o mesmo do usuario passado.
+        /// </summary>
+        /// <param name="novoCPF">cpf a ser pesquisado na base e comparado com o cliente, segue o padrão: 000.000.000-00</param>
+        /// <param name="id">id do cliente para comparação</param>
+        /// <returns></returns>
+        private bool verificaExistencia(string novoCPF, long id)
+        {
+            Cliente cliente = new BoCliente().Consultar(id);
+
+            if (cliente.CPF == novoCPF)
+            {
+                return false;
+            }
+            else
+            {
+                return new BoCliente().VerificarExistencia(novoCPF);
             }
         }
     }

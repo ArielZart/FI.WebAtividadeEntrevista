@@ -1,5 +1,10 @@
 ﻿
 $(document).ready(function () {
+
+    $("#CPF").mask('000.000.000-00', { reverse: true });
+    $("#CEP").mask('00000-000');
+    $("#Telefone").mask('(00) 0000-0000');
+
     if (obj) {
         $('#formCadastro #Nome').val(obj.Nome);
         $('#formCadastro #CEP').val(obj.CEP);
@@ -10,46 +15,59 @@ $(document).ready(function () {
         $('#formCadastro #Cidade').val(obj.Cidade);
         $('#formCadastro #Logradouro').val(obj.Logradouro);
         $('#formCadastro #Telefone').val(obj.Telefone);
+        $('#formCadastro #CPF').val(obj.CPF);
     }
 
     $('#formCadastro').submit(function (e) {
         e.preventDefault();
+
+        var cpf = $("#CPF").val();
+
+        // Retorno [bool, string] => [validado, mensagem]
+        var valido = validaCPF(cpf.toString());
+        if (valido[0]) {
+            $.ajax({
+                url: urlPost,
+                method: "POST",
+                data: {
+                    "NOME": $(this).find("#Nome").val(),
+                    "CEP": $(this).find("#CEP").val(),
+                    "Email": $(this).find("#Email").val(),
+                    "Sobrenome": $(this).find("#Sobrenome").val(),
+                    "Nacionalidade": $(this).find("#Nacionalidade").val(),
+                    "Estado": $(this).find("#Estado").val(),
+                    "Cidade": $(this).find("#Cidade").val(),
+                    "Logradouro": $(this).find("#Logradouro").val(),
+                    "Telefone": $(this).find("#Telefone").val(),
+                    "CPF": $(this).find("#CPF").val()
+                },
+                error:
+                    function (r) {
+                        if (r.status === 400)
+                            ModalDialog("Ocorreu um erro", r.responseJSON);
+                        else if (r.status === 500)
+                            ModalDialog("Ocorreu um erro", "Ocorreu um erro interno no servidor.");
+                    },
+                success:
+                    function (r) {
+                        ModalDialog("Sucesso!", r)
+                        $("#formCadastro")[0].reset();
+                        window.location.href = urlRetorno;
+                    }
+            });
+        }
+        else {
+            ModalDialog("Ocorreu um erro", valido[1]);
+        }
+
         
-        $.ajax({
-            url: urlPost,
-            method: "POST",
-            data: {
-                "NOME": $(this).find("#Nome").val(),
-                "CEP": $(this).find("#CEP").val(),
-                "Email": $(this).find("#Email").val(),
-                "Sobrenome": $(this).find("#Sobrenome").val(),
-                "Nacionalidade": $(this).find("#Nacionalidade").val(),
-                "Estado": $(this).find("#Estado").val(),
-                "Cidade": $(this).find("#Cidade").val(),
-                "Logradouro": $(this).find("#Logradouro").val(),
-                "Telefone": $(this).find("#Telefone").val()
-            },
-            error:
-            function (r) {
-                if (r.status == 400)
-                    ModalDialog("Ocorreu um erro", r.responseJSON);
-                else if (r.status == 500)
-                    ModalDialog("Ocorreu um erro", "Ocorreu um erro interno no servidor.");
-            },
-            success:
-            function (r) {
-                ModalDialog("Sucesso!", r)
-                $("#formCadastro")[0].reset();                                
-                window.location.href = urlRetorno;
-            }
-        });
     })
     
 })
 
 function ModalDialog(titulo, texto) {
     var random = Math.random().toString().replace('.', '');
-    var texto = '<div id="' + random + '" class="modal fade">                                                               ' +
+    var textoModal = '<div id="' + random + '" class="modal fade">                                                               ' +
         '        <div class="modal-dialog">                                                                                 ' +
         '            <div class="modal-content">                                                                            ' +
         '                <div class="modal-header">                                                                         ' +
@@ -67,6 +85,6 @@ function ModalDialog(titulo, texto) {
         '  </div><!-- /.modal-dialog -->                                                                                    ' +
         '</div> <!-- /.modal -->                                                                                        ';
 
-    $('body').append(texto);
+    $('body').append(textoModal);
     $('#' + random).modal('show');
 }
