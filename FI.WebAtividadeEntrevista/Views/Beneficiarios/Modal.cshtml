@@ -1,0 +1,159 @@
+﻿@model WebAtividadeEntrevista.ViewModels.BeneficiarioViewModel
+
+
+<style>
+    .rowBeneficiario {
+        cursor: pointer;
+    }
+
+    .rowBeneficiario:hover {
+        background-color: lightgray
+    }
+
+    div#modalDialog, div#modalDialog > div.modal-content > div.modal-body {
+        height: 500px !important;
+    }
+
+    #tabela_beneficiarios {
+        table-layout: fixed;
+        max-width: 100% !important;
+    }
+
+        #tabela_beneficiarios tbody {
+            display: block;
+            overflow: auto;
+            overflow-x:hidden;
+            height: 200px;
+            max-width: 100%;
+            margin: 0px;
+        }
+
+            #tabela_beneficiarios tbody tr {
+                margin-left: 1px;
+            }
+
+        #tabela_beneficiarios tbody td.infos {
+            min-width: 140px;
+            max-width: 140px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        #tabela_beneficiarios thead td {
+            width: 35%;
+        }
+
+        #tabela_beneficiarios thead,tbody tr {
+            margin: 0px;
+            width: 100%;
+            display: table;
+        }
+     
+</style>
+<script>
+    $(document).ready(function () {
+        $("#btn_beneficiario_incluir").click((event) => {            
+            var cpf = $("#CPFBeneficiario").val();
+            var nome = $("#NomeBeneficiario").val();
+            if (cpf === '' || nome === '') {
+
+                ModalDialog("Erro", "CPF e/ou Nome não preenchido");
+            } else {
+                
+                var valido = validaCPF(cpf);
+                if (valido[0]) {
+                    if (!existeCPFCadastrado()) {
+
+                        var id = $("#IdBeneficiario").val();
+                        criarEditarBeneficiario(id, cpf, nome);
+
+                    } else {
+
+                        ModalDialog("Ocorreu um erro", "Já existe esse CPF cadastro como beneficiador");
+                    }
+                    
+                } else {
+
+                    ModalDialog("Ocorreu um erro", valido[1]);
+                }
+                
+            }
+        });
+    });
+</script>
+<div class="modal-dialog" id="modalDialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h4 class="modal-title">Beneficiários</h4>
+        </div>
+        <div class="modal-body">
+            <div class="row">
+                <input type="hidden" name="IdBeneficiario" id="IdBeneficiario" value="" />
+                <div class="col-md-5">
+                    <div class="form-group">
+                        <label for="CPFBeneficiario">CPF:</label>
+                        <input required="required" type="text" class="form-control" id="CPFBeneficiario" name="CPFBeneficiario" placeholder="Ex.: 000.000.000-00" maxlength="14">
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <div class="form-group">
+                        <label for="Nome">Nome:</label>
+                        <input required="required" type="text" class="form-control" id="NomeBeneficiario" name="NomeBeneficiario" placeholder="Ex.: João" maxlength="50">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="btn_beneficiario_incluir">&nbsp;</label>
+                        <button id="btn_beneficiario_incluir" name="btn_beneficiario_incluir" class="btn btn-success btn-sm form-control">Incluir</button>
+                    </div>
+                </div>
+            </div>
+            <hr />
+            <div class="row">
+                <div class="col-md-12">
+                    @if (Model.ultimoIdGerado != null)
+                    {
+                        <input type="hidden" name="IdCont" id="IdCont" value="@Model.ultimoIdGerado" />
+                    }
+                    else
+                    {
+                        <input type="hidden" name="IdCont" id="IdCont" value="0" />
+                    }
+                    <table class="table" id="tabela_beneficiarios">
+                        <thead>
+                            <tr class="row">
+                                <td class="col-md-4"><label>CPF</label></td>
+                                <td class="col-md-4"><label>Nome</label></td>
+                                <td class="col-md-2"></td>
+                                <td class="col-md-2"></td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.listaBeneficiarios.Count > 0)
+                            {
+                                foreach (var item in Model.listaBeneficiarios)
+                                {
+                                    <tr class="row rowBeneficiario" id="rowBeneficiario_@item.Id">
+                                        <td class="col-md-4 infos" id="cpf_beneficiario_list_@item.Id">@item.CPF</td>
+                                        <td class="col-md-4 infos" id="nome_beneficiario_list_@item.Id">@item.Nome</td>
+                                        <td class="col-md-2"><button id="btn_beneficiario_editar_@item.Id" class="btn btn-info btn-sm" onclick="editarBeneficiario(event)">Editar</button></td>
+                                        <td class="col-md-2"><button id="btn_beneficiario_excluir_@item.Id" class="btn btn-info btn-sm" onclick="removerBeneficiario(event)">Excluir</button></td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <div class="row">
+                <div class="col-md-12">
+                    <button type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
