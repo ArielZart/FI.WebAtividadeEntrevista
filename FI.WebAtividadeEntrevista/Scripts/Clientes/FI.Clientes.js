@@ -1,5 +1,4 @@
-﻿
-$(document).ready(function () {
+﻿$(document).ready(function () {
 
     $("#CPF").mask('000.000.000-00', { reverse: true });
     $("#CEP").mask('00000-000');
@@ -37,7 +36,7 @@ $(document).ready(function () {
                     },
                 success:
                     function (r) {
-                        ModalDialog("Sucesso!", r)
+                        ModalDialog("Sucesso!", r);
                         $("#formCadastro")[0].reset();
                     }
             });
@@ -48,29 +47,38 @@ $(document).ready(function () {
         
     });
 
+    $("#btn_beneficiario").click(function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        var url = $(this).data("url"); 
+        
+        var listaRegistros = getAllRegistrosExistentes();
+        if (listaRegistros.length > 0) {
+            var idCount = $("#IdCont").val();
+            $.ajax(url, {
+                method: "POST",
+                data: { "beneficiarioViewModel": { "listaBeneficiarios": listaRegistros, "ultimoIdGerado": idCount, "beneficiario": null } },
+                success: (data) => {
+                    $("#modal").modal({ show: true, backdrop: "static" });
+                    $("#CPFBeneficiario").mask('000.000.000-00', { reverse: true });
+                }
+            });
+        }
+        else {
+            $.ajax(url, {
+                method: "GET",
+                success: (data) => {
+                    $("#modal").modal({ show: true, backdrop: "static" }).html(data);
+                    $("#CPFBeneficiario").mask('000.000.000-00', { reverse: true });
+                }
+            });
+        }
+        
+
+    });
+
+    
+
 });
 
-function ModalDialog(titulo, texto) {
-    var random = Math.random().toString().replace('.', '');
-    var textoModal = '<div id="' + random + '" class="modal fade">                                                               ' +
-        '        <div class="modal-dialog">                                                                                 ' +
-        '            <div class="modal-content">                                                                            ' +
-        '                <div class="modal-header">                                                                         ' +
-        '                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>         ' +
-        '                    <h4 class="modal-title">' + titulo + '</h4>                                                    ' +
-        '                </div>                                                                                             ' +
-        '                <div class="modal-body">                                                                           ' +
-        '                    <p>' + texto + '</p>                                                                           ' +
-        '                </div>                                                                                             ' +
-        '                <div class="modal-footer">                                                                         ' +
-        '                    <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>             ' +
-        '                                                                                                                   ' +
-        '                </div>                                                                                             ' +
-        '            </div><!-- /.modal-content -->                                                                         ' +
-        '  </div><!-- /.modal-dialog -->                                                                                    ' +
-        '</div> <!-- /.modal -->                                                                                        ';
-
-    $('body').append(textoModal);
-    $('#' + random).modal('show');
-}
 
