@@ -32,7 +32,7 @@
                 margin-left: 1px;
             }
 
-        #tabela_beneficiarios tbody td.infos {
+        #tabela_beneficiarios tbody tr td.infos {
             min-width: 140px;
             max-width: 140px;
             overflow: hidden;
@@ -53,6 +53,10 @@
 </style>
 <script>
     $(document).ready(function () {
+        $("#CPFBeneficiario").val("");
+        $("#NomeBeneficiario").val("");
+        $("#IdBeneficiario").val("");
+
         $("#btn_beneficiario_incluir").click((event) => {            
             var cpf = $("#CPFBeneficiario").val();
             var nome = $("#NomeBeneficiario").val();
@@ -63,16 +67,40 @@
                 
                 var valido = validaCPF(cpf);
                 if (valido[0]) {
-                    if (!existeCPFCadastrado()) {
+                    //Edição
+                    var id = $("#IdBeneficiario").val();
+                    if (id !== '' && id !== null) {
+                        var cpfLinhaEditada = $("#cpf_beneficiario_list_" + id).text();
+                        console.log(cpfLinhaEditada);
+                        console.log(cpf);
 
-                        var id = $("#IdBeneficiario").val();
-                        criarEditarBeneficiario(id, cpf, nome);
+                        // CPF antigo igual ao Novo não necessita de validação.
+                        if (cpf === cpfLinhaEditada) {
+                            editarCamposBeneficiario(id, cpf, nome);                            
+                        }
+                        else {
+                            console.log("Entrou diferente");
+                            if (!existeCPFCadastrado(cpf)) {
 
-                    } else {
+                                editarCamposBeneficiario(id, cpf, nome);
 
-                        ModalDialog("Ocorreu um erro", "Já existe esse CPF cadastro como beneficiador");
+                            } else {
+
+                                ModalDialog("Ocorreu um erro", "Já existe esse CPF cadastro como beneficiador");
+                            }
+                        }
                     }
-                    
+                    // Criação
+                    else {
+                        if (!existeCPFCadastrado(cpf)) {
+
+                            criarBeneficiario(cpf, nome);
+
+                        } else {
+
+                            ModalDialog("Ocorreu um erro", "Já existe esse CPF cadastro como beneficiador");
+                        }
+                    }    
                 } else {
 
                     ModalDialog("Ocorreu um erro", valido[1]);
@@ -80,6 +108,9 @@
                 
             }
         });
+
+        $("[rel=tooltip]").tooltip({ placement: 'bottom' });
+
     });
 </script>
 <div class="modal-dialog" id="modalDialog">
@@ -112,15 +143,7 @@
             </div>
             <hr />
             <div class="row">
-                <div class="col-md-12">
-                    @if (Model.ultimoIdGerado != null)
-                    {
-                        <input type="hidden" name="IdCont" id="IdCont" value="@Model.ultimoIdGerado" />
-                    }
-                    else
-                    {
-                        <input type="hidden" name="IdCont" id="IdCont" value="0" />
-                    }
+                <div class="col-md-12">                 
                     <table class="table" id="tabela_beneficiarios">
                         <thead>
                             <tr class="row">
@@ -135,11 +158,13 @@
                             {
                                 foreach (var item in Model.listaBeneficiarios)
                                 {
-                                    <tr class="row rowBeneficiario" id="rowBeneficiario_@item.Id">
-                                        <td class="col-md-4 infos" id="cpf_beneficiario_list_@item.Id">@item.CPF</td>
-                                        <td class="col-md-4 infos" id="nome_beneficiario_list_@item.Id">@item.Nome</td>
-                                        <td class="col-md-2"><button id="btn_beneficiario_editar_@item.Id" class="btn btn-info btn-sm" onclick="editarBeneficiario(event)">Editar</button></td>
-                                        <td class="col-md-2"><button id="btn_beneficiario_excluir_@item.Id" class="btn btn-info btn-sm" onclick="removerBeneficiario(event)">Excluir</button></td>
+                                    var guid = Guid.NewGuid();
+                                    <tr class="row rowBeneficiario" id="rowBeneficiario_@guid">
+                                        <td class="hidden" id="id_beneficiario_list_@guid">@item.Id</td>                                          
+                                        <td class="col-md-4 infos" id="cpf_beneficiario_list_@guid">@item.CPF</td>
+                                        <td class="col-md-4 infos" id="nome_beneficiario_list_@guid">@item.Nome</td>
+                                        <td class="col-md-2"><button id="btn_beneficiario_editar_@guid" class="btn btn-info btn-sm" onclick="editarBeneficiario(event)">Editar</button></td>
+                                        <td class="col-md-2"><button id="btn_beneficiario_excluir_@guid" class="btn btn-info btn-sm" onclick="removerBeneficiario(event)">Excluir</button></td>
                                     </tr>
                                 }
                             }
@@ -150,7 +175,10 @@
         </div>
         <div class="modal-footer">
             <div class="row">
-                <div class="col-md-12">
+                <div class="col-md-1">
+                    <i class="glyphicon glyphicon-exclamation-sign" rel="tooltip" data-placement="bottom" title="As informações são salvas junto com o formulario do cliente."></i>
+                </div>
+                <div class="col-md-11">
                     <button type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true">Fechar</button>
                 </div>
             </div>

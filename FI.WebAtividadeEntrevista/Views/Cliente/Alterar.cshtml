@@ -7,6 +7,10 @@
         var urlPost = '@Url.Action("Alterar", "Cliente", new { area = "" })';
         var obj = @Html.Raw(Json.Encode(Model));
         var urlRetorno = '@Url.Action("Index", "Cliente", new { area = "" })';
+        var urlBeneficiarios = '@Url.Action("Modal", "Beneficiarios")';
+        var urlListarBeneficiarios = '@Url.Action("Listar", "Beneficiarios")';
+        var urlAlterarBeneficiarios = '@Url.Action("Alterar", "Beneficiarios")';
+        var urlExcluirBeneficiarios = '@Url.Action("Excluir", "Beneficiarios")';
 </script>
     @Scripts.Render("~/bundles/altClientes")
 }

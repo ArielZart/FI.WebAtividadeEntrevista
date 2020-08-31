@@ -5,6 +5,8 @@
 @section scripts{
     <script>
         var urlPost = '@Url.Action("Incluir", "Cliente", new { area = "" })';
+        var urlBeneficiarios = '@Url.Action("Modal", "Beneficiarios")';
+        var urlIncluirBeneficiarios = '@Url.Action("Incluir", "Beneficiarios")';
     </script>
     @Scripts.Render("~/bundles/clientes")
 }
