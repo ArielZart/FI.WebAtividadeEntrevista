@@ -51,9 +51,9 @@ $(document).ready(function () {
                     },
                 success:
                     function (r) {
-                        ModalDialog("Sucesso!", r)
                         $("#formCadastro")[0].reset();
-                        window.location.href = urlRetorno;
+
+                        salvarBeneficiarios(r);                        
                     }
             });
         }
@@ -67,27 +67,35 @@ $(document).ready(function () {
     $("#btn_beneficiario").click(function (e) {
         e.preventDefault();
         e.stopPropagation();
-        var url = $(this).data("url");
-        console.log(url);
+        var listaDeletados = getListaDeletados();
 
         var listaRegistros = getAllRegistrosExistentes();
-        if (listaRegistros.length > 0) {
-            var idCount = $("#IdCont").val();
-            $.ajax(url, {
+
+        // Caso a quantidade de beneficiarios ou os deletados sejam maior que 0, realiza a chamada do post para o servidor para realizar a abertura do modal persistindo as alterações realizadas.
+        // Caso não realiza uma chamada get normal para listar os beneficiarios a partir do cliente que está selecionado
+        if (listaRegistros.length > 0 || listaDeletados.length > 0) {
+            $.ajax(urlBeneficiarios, {
                 method: "POST",
-                data: { "beneficiarioViewModel": { "listaBeneficiarios": listaRegistros, "ultimoIdGerado": idCount, "beneficiario": null } },
+                data: { "beneficiarioViewModel": { "listaBeneficiarios": listaRegistros } },
                 success: (data) => {
                     $("#modal").modal({ show: true, backdrop: "static" });
                     $("#CPFBeneficiario").mask('000.000.000-00', { reverse: true });
+                    $("#IdBeneficiario").val("");
+                    $("#CPFBeneficiario").val("");
+                    $("#NomeBeneficiario").val("");
                 }
             });
         }
         else {
-            $.ajax(url, {
+            $.ajax(urlListarBeneficiarios, {
                 method: "GET",
+                data: { "id": parseInt(obj.Id) },
                 success: (data) => {
                     $("#modal").modal({ show: true, backdrop: "static" }).html(data);
                     $("#CPFBeneficiario").mask('000.000.000-00', { reverse: true });
+                    $("#IdBeneficiario").val("");
+                    $("#CPFBeneficiario").val("");
+                    $("#NomeBeneficiario").val("");
                 }
             });
         }
@@ -97,26 +105,34 @@ $(document).ready(function () {
 
 });
 
-//function ModalDialog(titulo, texto) {
-//    var random = Math.random().toString().replace('.', '');
-//    var textoModal = '<div id="' + random + '" class="modal fade">                                                               ' +
-//        '        <div class="modal-dialog">                                                                                 ' +
-//        '            <div class="modal-content">                                                                            ' +
-//        '                <div class="modal-header">                                                                         ' +
-//        '                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>         ' +
-//        '                    <h4 class="modal-title">' + titulo + '</h4>                                                    ' +
-//        '                </div>                                                                                             ' +
-//        '                <div class="modal-body">                                                                           ' +
-//        '                    <p>' + texto + '</p>                                                                           ' +
-//        '                </div>                                                                                             ' +
-//        '                <div class="modal-footer">                                                                         ' +
-//        '                    <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>             ' +
-//        '                                                                                                                   ' +
-//        '                </div>                                                                                             ' +
-//        '            </div><!-- /.modal-content -->                                                                         ' +
-//        '  </div><!-- /.modal-dialog -->                                                                                    ' +
-//        '</div> <!-- /.modal -->                                                                                        ';
+/**
+ * Function para realizar a atualização dos beneficiarios do cliente sendo alterado.
+ * Começa excluindo os registros que foram deletados da tabela.
+ * Depois faz a atualização dos registros no Banco
+ * @param {string} msg Mensagem do resultado da alteração do cliente.
+ */
+function salvarBeneficiarios(msg) {
+    var listaDeletados = getListaDeletados();
+    console.log(listaDeletados);
+    $.ajax(urlExcluirBeneficiarios, {
+        method: "POST",
+        data: { "lista": listaDeletados },
+        success: (d) => {
+            console.log(d);
+            $("#ListaDeletados").val("");
+            var listaRegistros = getAllRegistrosExistentes(obj.Id);
+            $.ajax(urlAlterarBeneficiarios, {
+                method: "POST",
+                data: { "lista": listaRegistros },
+                success: (data) => {
+                    console.log(data);
+                    ModalDialog("Sucesso!", msg);
+                    window.location.href = urlRetorno;
+                }
+            });
+        }
+    });
+}
 
-//    $('body').append(textoModal);
-//    $('#' + random).modal('show');
-//}
+
+

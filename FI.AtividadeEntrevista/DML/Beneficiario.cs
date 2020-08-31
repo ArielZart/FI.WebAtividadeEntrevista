@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 
 namespace FI.AtividadeEntrevista.DML
 {
-    class Beneficiario
+    /// <summary>
+    /// Classe que representa o Beneficiario de um Cliente
+    /// </summary>
+    public class Beneficiario
     {
         /// <summary>
         /// Id

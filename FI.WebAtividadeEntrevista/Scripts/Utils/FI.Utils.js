@@ -1,11 +1,16 @@
-﻿function getAllRegistrosExistentes() {
+﻿/**
+ * Retorna todos os registros de beneficiarios da tabela.
+ * @param {any} id IDCliente caso seja necessario, por padrão é 0.
+ * @returns {Array} Array com todos os registros encontrados na tabela de beneficiarios
+ */
+function getAllRegistrosExistentes(id = 0) {
     var registros = $("#modal table tbody tr");
     var lista = [];
     $(registros).each((i, e) => {
         var idTr = e.id.split("_")[1];
         var objBeneficiarioModel = {
-            "Id": 0,
-            "IdCliente": 0,
+            "Id": $(e).find("#id_beneficiario_list_" + idTr).text(),
+            "IdCliente": id,
             "Nome": $(e).find("#nome_beneficiario_list_" + idTr).text(),
             "CPF": $(e).find("#cpf_beneficiario_list_" + idTr).text()
         };
@@ -16,7 +21,26 @@
     return lista;
 }
 
+/**
+ * Retorna um array contendo todos os ids dos registro que ja existiam no banco mas foram apagados
+ * @returns {Array} Array com todos os id dos registros
+ * */
+function getListaDeletados() {
+    var lista = $("#ListaDeletados").val();
+    if (lista !== "") {
+        return lista.split(",");
+    }
+    else {
+        return new Array();
+    }
+}
 
+
+/**
+ * Chama um modal para apresentar uma mensagem
+ * @param {any} titulo Titulo do modal 
+ * @param {any} texto Texto a ser apresentado
+ */
 function ModalDialog(titulo, texto) {
     var random = Math.random().toString().replace('.', '');
     var textoModal = '<div id="' + random + '" class="modal fade">                                                               ' +

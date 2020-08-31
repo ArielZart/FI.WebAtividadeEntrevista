@@ -1,4 +1,6 @@
-﻿using System;
+﻿using FI.AtividadeEntrevista.BLL;
+using FI.AtividadeEntrevista.DML;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -15,8 +17,7 @@ namespace WebAtividadeEntrevista.Controllers
         public ActionResult Modal()
         {
             var viewmodel = new BeneficiarioViewModel();
-            viewmodel.listaBeneficiarios = new List<BeneficiarioModel>();
-            viewmodel.ultimoIdGerado = null;
+            viewmodel.listaBeneficiarios = new List<Beneficiario>();
 
             return PartialView("Modal", viewmodel);
         }
@@ -25,10 +26,88 @@ namespace WebAtividadeEntrevista.Controllers
         public ActionResult Modal(BeneficiarioViewModel beneficiarioViewModel)
         {
             var viewmodel = new BeneficiarioViewModel();
-            viewmodel.listaBeneficiarios = beneficiarioViewModel.listaBeneficiarios;
-            viewmodel.ultimoIdGerado = beneficiarioViewModel.ultimoIdGerado;
+            if (beneficiarioViewModel.listaBeneficiarios != null)
+            {
+                viewmodel.listaBeneficiarios = beneficiarioViewModel.listaBeneficiarios;
+            }
+            else
+            {
+                viewmodel.listaBeneficiarios = new List<Beneficiario>();
+            }
+
 
             return PartialView("Modal", viewmodel);
+        }
+
+        [HttpGet]
+        public ActionResult Listar(long id)
+        {
+            BoBeneficiario bb = new BoBeneficiario();
+
+            List<Beneficiario> beneficiarios = bb.Listar(id);
+
+            var viewmodel = new BeneficiarioViewModel();
+            viewmodel.listaBeneficiarios = beneficiarios;
+
+            return PartialView("Modal", viewmodel);
+        }        
+
+        [HttpPost]
+        public JsonResult Incluir(List<Beneficiario> lista)
+        {
+            if(lista.Count > 0)
+            {
+                BoBeneficiario bb = new BoBeneficiario();
+                foreach (Beneficiario item in lista)
+                {
+                    bb.Incluir(item);
+                }
+
+                return Json("Beneficiarios cadastrados com sucesso.");
+            }
+
+            return Json("Sem beneficiarios a serem cadastrados.");
+        }
+
+        [HttpPost]
+        public JsonResult Alterar(List<Beneficiario> lista)
+        {
+            if(lista != null)
+            {
+                BoBeneficiario bb = new BoBeneficiario();
+                foreach (Beneficiario item in lista)
+                {
+                    if (item.Id == -1)
+                    {
+                        bb.Incluir(item);
+                    }
+                    else
+                    {
+                        bb.Alterar(item);
+                    }
+                }
+
+                return Json("Beneficiarios alterados/criados com sucesso.");
+            }
+
+            return Json("Sem beneficiarios a serem alterados.");
+        }
+
+        [HttpPost]
+        public JsonResult Excluir(int[] lista)
+        {
+            if (lista != null)
+            {
+                BoBeneficiario bb = new BoBeneficiario();
+                foreach (var item in lista)
+                {
+                    bb.Excluir(item);
+                }
+
+                return Json("Beneficiarios excluidos com sucesso.");
+            }
+
+            return Json("Sem beneficiarios a serem excluidos.");
         }
     }
 }

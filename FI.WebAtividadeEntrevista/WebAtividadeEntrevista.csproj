@@ -246,6 +246,7 @@
     <Content Include="Content\themes\base\tooltip.css" />
     <Content Include="favicon.ico" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="fonts\tooltip-icon.png" />
     <Content Include="Global.asax" />
     <Content Include="Scripts\Beneficiarios\FI.Beneficiarios.js" />
     <Content Include="Scripts\Utils\FI.Utils.js" />

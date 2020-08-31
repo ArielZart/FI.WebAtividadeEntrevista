@@ -36,8 +36,20 @@
                     },
                 success:
                     function (r) {
-                        ModalDialog("Sucesso!", r);
+                        console.log(r.id);
                         $("#formCadastro")[0].reset();
+
+                        // Realiza a chamada de inclusão dos beneficiarios para o cliente que acabou de ser criado.
+                        var listaRegistrosASeremIncluido = getAllRegistrosExistentes(r.id);
+                        console.log(listaRegistrosASeremIncluido);
+                        $.ajax(urlIncluirBeneficiarios, {
+                            method: "POST",
+                            data: { "lista": listaRegistrosASeremIncluido },
+                            success: (data) => {
+                                $("#modal").html("");
+                                ModalDialog("Sucesso!", r.msg);
+                            }
+                        });
                     }
             });
         }
@@ -50,26 +62,32 @@
     $("#btn_beneficiario").click(function(e){
         e.preventDefault();
         e.stopPropagation();
-        var url = $(this).data("url"); 
-        
-        var listaRegistros = getAllRegistrosExistentes();
+
+        // Caso a quantidade de beneficiarios seja maior que 0, realiza a chamada do post para o servidor para realizar a abertura do modal persistindo as alterações realizadas.
+        // Caso não realiza uma chamada get normal para trazer o modal inicial
+        var listaRegistros = getAllRegistrosExistentes(0);
         if (listaRegistros.length > 0) {
-            var idCount = $("#IdCont").val();
-            $.ajax(url, {
+            $.ajax(urlBeneficiarios, {
                 method: "POST",
-                data: { "beneficiarioViewModel": { "listaBeneficiarios": listaRegistros, "ultimoIdGerado": idCount, "beneficiario": null } },
+                data: { "beneficiarioViewModel": { "listaBeneficiarios": listaRegistros } },
                 success: (data) => {
                     $("#modal").modal({ show: true, backdrop: "static" });
                     $("#CPFBeneficiario").mask('000.000.000-00', { reverse: true });
+                    $("#IdBeneficiario").val("");
+                    $("#CPFBeneficiario").val("");
+                    $("#NomeBeneficiario").val("");
                 }
             });
         }
         else {
-            $.ajax(url, {
+            $.ajax(urlBeneficiarios, {
                 method: "GET",
                 success: (data) => {
                     $("#modal").modal({ show: true, backdrop: "static" }).html(data);
                     $("#CPFBeneficiario").mask('000.000.000-00', { reverse: true });
+                    $("#IdBeneficiario").val("");
+                    $("#CPFBeneficiario").val("");
+                    $("#NomeBeneficiario").val("");
                 }
             });
         }
